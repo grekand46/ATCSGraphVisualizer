@@ -169,13 +169,19 @@ export function drawPath(data, vertices, animateDelay, onComplete) {
     }
 }
 
-export function connectTwoNodes(data, start, target) {
-    if (!config.graphEnabled) return;
-    if (data == null || start == null || target == null) return;
+export function connectTwoNodes(data, start, target, onComplete) {
+    let fail = false;
+    if (!config.graphEnabled) fail = true;
+    if (data == null || start == null || target == null) fail = true;
 
     const keys = Object.keys(data);
-    if (keys.length == 0) return;
-    if (!keys.includes(start) || !keys.includes(target)) return;
+    if (keys.length == 0) fail = true;
+    if (!keys.includes(start) || !keys.includes(target)) fail = true;
+
+    if (fail) {
+        if (onComplete != null && typeof onComplete == "function") onComplete();
+        return;
+    }
 
     const queue = [start];
     const visited = new Set([start]);
@@ -194,7 +200,10 @@ export function connectTwoNodes(data, start, target) {
         }
     }
 
-    if (!visited.has(target)) return;
+    if (!visited.has(target)) {
+        if (onComplete != null && typeof onComplete == "function") onComplete();
+        return;
+    }
 
     const path = [];
     let curr = target;
@@ -204,7 +213,7 @@ export function connectTwoNodes(data, start, target) {
         curr = parent[curr];
     }
     
-    drawPath(data, path, 750, null);
+    drawPath(data, path, 750, onComplete);
 }
 
 export function updateTooltip(data, event) {

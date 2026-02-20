@@ -17,12 +17,12 @@
             <div class="control" data-control="graph">
                 <p class="title">Graph</p>
                 <label for="dataMode">Data Mode:</label>
-                <select name="dataMode" id="dataMode" class="DEPanimateHamPath">
+                <select name="dataMode" id="dataMode" class="DEPanimateHamPath DEPconnect">
                     <option value="0">Students</option>
                     <option value="1" selected>Groups</option>
                 </select>
                 <br>
-                <button id="drawGraph" class="DEPanimateHamPath">Draw</button>
+                <button id="drawGraph" class="DEPanimateHamPath DEPconnect">Draw</button>
             </div>
             <div class="control">
                 <p class="title">Connect</p>
@@ -32,21 +32,21 @@
                 <label for="connectTo">To</label>
                 <input type="text" name="connectTo" id="connectTo" class="DEPconnect" autocapitalize="off" autocomplete="off" autocorrect="off">
                 <br>
-                <button id="runConnect" class="DEPconnect">Connect</button>
+                <button id="runConnect" class="DEPconnect DEPanimateHamPath">Connect</button>
             </div>
             <div class="control" data-control="hamPath">
                 <p class="title">HamPath</p>
                 <p class="DEPdataMode"></p>
-                <button id="drawHamPath" class="DEPanimateHamPath">Draw</button>
-                <button id="animateHamPath" class="DEPanimateHamPath">Animate</button>
-                <button id="clearHamPath" class="DEPanimateHamPath">Remove</button>
+                <button id="drawHamPath" class="DEPanimateHamPath DEPconnect">Draw</button>
+                <button id="animateHamPath" class="DEPanimateHamPath DEPconnect">Animate</button>
+                <button id="clearHamPath" class="DEPanimateHamPath DEPconnect">Remove</button>
                 <br>
                 <label for="animateHamPathDelay">Delay (ms):</label>
                 <input type="number" name="animateHamPathDelay" id="animateHamPathDelay" class="DEPanimateHamPath" min="100" value="250" max="2000">
             </div>
             <div class="control">
                 <p class="title">Tooltips</p>
-                <button id="toggleTooltips" class="DEPanimateHamPath">Enable</button>
+                <button id="toggleTooltips" class="DEPanimateHamPath DEPconnect">Enable</button>
 
                 <div class="tooltip">
                     <p>Hello</p>

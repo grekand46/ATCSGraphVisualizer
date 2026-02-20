@@ -53,14 +53,16 @@ export function attachUIEventListeners() {
     });
 
     IconnectNodes.addEventListener("click", () => {
+        if (config.tooltipsEnabled) ItoggleTooltips.click();
         disableAllElems("DEPconnect");
+
         if (config.pathEnabled) {
             clearCanvas();
             if (config.graphEnabled) drawGraph(data[config.dataMode], false);
         }
         config.pathEnabled = true;
-        connectTwoNodes(data[config.dataMode], document.querySelector("#connectFrom").value, document.querySelector("#connectTo").value);
-        enableAllElems("DEPconnect");
+        
+        connectTwoNodes(data[config.dataMode], document.querySelector("#connectFrom").value, document.querySelector("#connectTo").value, () => enableAllElems("DEPconnect"));
     });
 
     IdrawHamPath.addEventListener("click", () => {
@@ -81,6 +83,7 @@ export function attachUIEventListeners() {
             if (config.graphEnabled) drawGraph(data[config.dataMode], false);
         }
         config.pathEnabled = true;
+        
         drawPath(data[config.dataMode], hamPaths[config.dataMode], parseInt(IanimateHamPathDelay.value) || 250, () => enableAllElems("DEPanimateHamPath"));
     });
 
