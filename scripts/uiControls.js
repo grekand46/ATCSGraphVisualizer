@@ -23,6 +23,8 @@ const IdataMode = document.querySelector("#dataMode");
 
 const IdrawGraph = document.querySelector("#drawGraph");
 
+const IconnectFrom = document.querySelector("#connectFrom");
+const IconnectTo = document.querySelector("#connectTo");
 const IconnectNodes = document.querySelector("#runConnect");
 
 const IdrawHamPath = document.querySelector("#drawHamPath");
@@ -42,6 +44,8 @@ export function attachUIEventListeners() {
         // if (config.graphEnabled) IdrawGraph.innerText = "Redraw";
         clearCanvas();
         config.graphEnabled = false;
+        IconnectFrom.innerHTML = "";
+        IconnectTo.innerHTML = "";
 
         updateTextDependencies();
     });
@@ -50,6 +54,7 @@ export function attachUIEventListeners() {
         config.graphEnabled = true;
         IdrawGraph.innerText = "Redraw";
         drawGraph(data[config.dataMode], true);
+        updateConnectDropdowns(data[config.dataMode]);
     });
 
     IconnectNodes.addEventListener("click", () => {
@@ -62,7 +67,7 @@ export function attachUIEventListeners() {
         }
         config.pathEnabled = true;
         
-        connectTwoNodes(data[config.dataMode], document.querySelector("#connectFrom").value, document.querySelector("#connectTo").value, () => enableAllElems("DEPconnect"));
+        connectTwoNodes(data[config.dataMode], IconnectFrom.value, IconnectTo.value, () => enableAllElems("DEPconnect"));
     });
 
     IdrawHamPath.addEventListener("click", () => {
@@ -104,6 +109,24 @@ export function attachUIEventListeners() {
         const map = { "Enable": "Disable", "Disable": "Enable" };
         ItoggleTooltips.innerText = map[ItoggleTooltips.innerText || "Error"];
     });
+}
+
+function updateConnectDropdowns(data) {
+    IconnectFrom.innerHTML = "";
+    IconnectTo.innerHTML = "";
+
+    const keys = Object.keys(data).sort();
+
+    for (let i = 0; i < keys.length; i++) {
+        const option = document.createElement("option");
+        option.value = keys[i];
+        option.innerText = keys[i];
+
+        IconnectFrom.appendChild(option.cloneNode(true));
+
+        if (i == 1) option.setAttribute("selected", "true");
+        IconnectTo.appendChild(option.cloneNode(true));
+    }
 }
 
 function updateTextDependencies() {

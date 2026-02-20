@@ -93,12 +93,16 @@ body {
     margin-bottom: 10px;
 }
 
-.control select, .control input[type="number"], .control input[type="text"] {
+.control select, .control input[type="number"] {
     outline: 0;
     border: 2px solid hsl(0, 0%, 80%);
     padding: 3px 7px;
     border-radius: 5px;
     margin-top: 5px;
+}
+
+.control select:focus, .control select:focus-within, .control input:focus, .control input:focus-within {
+    outline: 1px solid white;
 }
 
 .control button {
@@ -132,6 +136,10 @@ body {
 
 .control button:disabled {
     cursor: not-allowed;
+}
+
+.control button:focus {
+    outline: 2px solid white;
 }
 
 .tooltip {

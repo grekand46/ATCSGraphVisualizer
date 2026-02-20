@@ -173,6 +173,7 @@ export function connectTwoNodes(data, start, target, onComplete) {
     let fail = false;
     if (!config.graphEnabled) fail = true;
     if (data == null || start == null || target == null) fail = true;
+    if (start == target) fail = true;
 
     const keys = Object.keys(data);
     if (keys.length == 0) fail = true;
