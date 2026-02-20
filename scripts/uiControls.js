@@ -44,8 +44,8 @@ export function attachUIEventListeners() {
         // if (config.graphEnabled) IdrawGraph.innerText = "Redraw";
         clearCanvas();
         config.graphEnabled = false;
-        IconnectFrom.innerHTML = "";
-        IconnectTo.innerHTML = "";
+        IconnectFrom.innerHTML = "<option value=\"Draw First\">Draw First</option>";
+        IconnectTo.innerHTML = "<option value=\"Draw First\">Draw First</option>";
 
         updateTextDependencies();
     });
@@ -58,7 +58,8 @@ export function attachUIEventListeners() {
     });
 
     IconnectNodes.addEventListener("click", () => {
-        if (config.tooltipsEnabled) ItoggleTooltips.click();
+        const tempTooltip = config.tooltipsEnabled;
+        if (tempTooltip) ItoggleTooltips.click();
         disableAllElems("DEPconnect");
 
         if (config.pathEnabled) {
@@ -67,7 +68,10 @@ export function attachUIEventListeners() {
         }
         config.pathEnabled = true;
         
-        connectTwoNodes(data[config.dataMode], IconnectFrom.value, IconnectTo.value, () => enableAllElems("DEPconnect"));
+        connectTwoNodes(data[config.dataMode], IconnectFrom.value, IconnectTo.value, () => {
+            enableAllElems("DEPconnect");
+            if (tempTooltip) ItoggleTooltips.click();
+        });
     });
 
     IdrawHamPath.addEventListener("click", () => {
@@ -80,7 +84,8 @@ export function attachUIEventListeners() {
     });
 
     IanimateHamPath.addEventListener("click", () => {
-        if (config.tooltipsEnabled) ItoggleTooltips.click();
+        const tempTooltip = config.tooltipsEnabled;
+        if (tempTooltip) ItoggleTooltips.click();
         disableAllElems("DEPanimateHamPath");
 
         if (config.pathEnabled) {
@@ -89,7 +94,10 @@ export function attachUIEventListeners() {
         }
         config.pathEnabled = true;
         
-        drawPath(data[config.dataMode], hamPaths[config.dataMode], parseInt(IanimateHamPathDelay.value) || 250, () => enableAllElems("DEPanimateHamPath"));
+        drawPath(data[config.dataMode], hamPaths[config.dataMode], parseInt(IanimateHamPathDelay.value) || 250, () => {
+            enableAllElems("DEPanimateHamPath");
+            if (tempTooltip) ItoggleTooltips.click();
+        });
     });
 
     IclearHamPath.addEventListener("click", () => {

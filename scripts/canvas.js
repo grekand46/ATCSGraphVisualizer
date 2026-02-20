@@ -165,7 +165,7 @@ export function drawPath(data, vertices, animateDelay, onComplete) {
 
     ctx.lineWidth = 2;
     for (let i = 1; i < vertices.length; i++) {
-        setTimeout(() => { drawEdge(i) }, i * animateDelay);
+        setTimeout(() => { drawEdge(i) }, (i - 1) * animateDelay);
     }
 }
 
