@@ -39,7 +39,7 @@ export function attachCanvasEventListeners() {
 }
 
 export function screenTooSmall() {
-    return window.innerWidth > 900 && window.innerHeight > 600;
+    return window.innerWidth < 900 || window.innerHeight < 600;
 }
 
 export function resizeCanvas() {
