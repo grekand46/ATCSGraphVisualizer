@@ -211,14 +211,9 @@ export function handleMouseMove(data, event) {
 }
 
 const renderLoop = {
-    // enable: false,
     active: false,
     frame(data) {
-        // if (!this.active) {
-        //     return;
-        // }
         this.active = true;
-        // this.enable = true;
         drawFullGraph(data, false);
         window.requestAnimationFrame(() => this.frame(data));
     },
