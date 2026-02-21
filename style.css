@@ -48,7 +48,7 @@ body {
     pointer-events: none;
 }
 
-@media only screen and (max-width: 900px) {
+@media only screen and (max-width: 900px), only screen and (max-height: 600px) {
     .phone-container {
         display: block;
         width: 100vw;

@@ -38,6 +38,10 @@ export function attachCanvasEventListeners() {
     });
 }
 
+export function screenTooSmall() {
+    return window.innerWidth > 900 && window.innerHeight > 600;
+}
+
 export function resizeCanvas() {
     renderLoop.cancel();
 
@@ -179,7 +183,7 @@ export function handleAlgoChange(graphAlgo) {
 }
 
 export function drawFullGraph(data, redoVertexPositions = false) {
-    if (window.innerWidth < 900) return;
+    if (screenTooSmall()) return;
     
     // resizeCanvas();
     clearCanvas();
