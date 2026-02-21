@@ -1,5 +1,5 @@
 import { config, updateTooltipText, updateTooltipPos, updateTooltipBorderColor, hideTooltip, getTooltipRect } from "./uiControls.js";
-import { toTitleString } from "./util.js";
+import { toTitleCase } from "./util.js";
 
 const canvasWrapper = document.querySelector(".canvas-wrapper");
 const canvas = document.querySelector("#canvas");
@@ -35,7 +35,7 @@ export function drawGraph(data, redoVertexPositions = false) {
     const Y_UPPER = ctx.canvas.height - VERTEX_RADIUS;
 
     // Determine vertex draw locations
-    if (redoVertexPositions || drawPositions.length < 1) {
+    if (redoVertexPositions || drawPositions.length == 0) {
         drawPositions.length = 0;
 
         for (const k of Object.keys(data)) {
@@ -142,7 +142,7 @@ export function drawPath(data, vertices, animateDelay = 0, onComplete = () => {}
         ctx.stroke();
 
         if (animateDelay > 0) {
-            updateTooltipText(vertices[idx]);
+            updateTooltipText(data[vertices[idx]].label || toTitleCase(vertices[idx]));
             updateTooltipPos(curr.pos.x, curr.pos.y - VERTEX_RADIUS, true, true);
             updateTooltipBorderColor(curr.colorH);
         }
@@ -229,7 +229,7 @@ export function updateTooltip(data, event) {
         const v = data[k];
 
         if (Math.abs(v.pos.x - event.clientX) <= VERTEX_RADIUS && Math.abs(v.pos.y - event.clientY) <= VERTEX_RADIUS) {
-            updateTooltipText(toTitleString(k));
+            updateTooltipText(v.label || toTitleCase(k));
             updateTooltipPos(event.clientX + 7, event.clientY + 5);
             updateTooltipBorderColor(v.colorH);
 

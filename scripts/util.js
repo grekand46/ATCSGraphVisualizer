@@ -1,4 +1,4 @@
-export function toTitleString(str) {
+export function toTitleCase(str) {
     if (str == null || str.trim() == "") return str;
 
     const arr = str.split(" ");

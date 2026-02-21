@@ -1,6 +1,6 @@
 import { data, hamPaths } from "./data.js";
 import { drawGraph, drawPath, clearCanvas, connectTwoNodes } from "./canvas.js";
-import { clamp } from "./util.js";
+import { clamp, toTitleCase } from "./util.js";
 
 export const DATA_MODES = Object.freeze({
     STUDENTS: 0,
@@ -128,7 +128,7 @@ function updateConnectDropdowns(data) {
     for (let i = 0; i < keys.length; i++) {
         const option = document.createElement("option");
         option.value = keys[i];
-        option.innerText = keys[i];
+        option.innerText = data[keys[i]].label || toTitleCase(keys[i]);
 
         IconnectFrom.appendChild(option.cloneNode(true));
 
