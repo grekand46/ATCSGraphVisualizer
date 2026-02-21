@@ -1,12 +1,42 @@
+import { data } from "./data.js";
 import { config, updateTooltipText, updateTooltipPos, updateTooltipBorderColor, hideTooltip, GRAPH_ALGOS } from "./uiControls.js";
 import { toTitleCase } from "./util.js";
 
 const canvasWrapper = document.querySelector(".canvas-wrapper");
-const canvas = document.querySelector("#canvas");
+export const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 
 const drawPositions = [];
 let VERTEX_RADIUS = GRAPH_ALGOS.CARTESIAN;
+
+const camera = {
+    scale: 1,
+    offsetX: 0,
+    offsetY: 0
+};
+
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+let cameraStartX = 0;
+let cameraStartY = 0;
+
+const DRAG_THRESHOLD = 5;
+let hasMoved = false;
+
+export function attachCanvasEventListeners() {
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseup", onMouseUp);
+    // canvas.addEventListener("mouseleave", onMouseUp);
+
+    canvas.addEventListener("mouseleave", () => {
+        isDragging = false;
+        hasMoved = false;
+        canvas.style.cursor = "default";
+    });
+}
 
 export function resizeCanvas() {
     canvas.width = 0;
@@ -18,8 +48,125 @@ export function resizeCanvas() {
 }
 
 export function clearCanvas() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     hideTooltip();
+}
+
+function screenToWorld(x, y) {
+    return {
+        x: (x - camera.offsetX) / camera.scale,
+        y: (y - camera.offsetY) / camera.scale
+    };
+}
+
+export function zoomAt(screenX, screenY, factor) {
+    const prevScale = camera.scale;
+    const newScale = prevScale * factor;
+
+    camera.offsetX = screenX - (screenX - camera.offsetX) * (newScale / prevScale);
+    camera.offsetY = screenY - (screenY - camera.offsetY) * (newScale / prevScale);
+
+    camera.scale = newScale;
+}
+
+export function resetZoom() {
+    camera.scale = 1;
+    camera.offsetX = 0;
+    camera.offsetY = 0;
+}
+
+function onMouseDown(event) {
+    if (!config.graphEnabled || drawPathBusy) return;
+
+    isDragging = true;
+    hasMoved = false;
+
+    dragStartX = event.clientX;
+    dragStartY = event.clientY;
+
+    cameraStartX = camera.offsetX;
+    cameraStartY = camera.offsetY;
+
+    canvas.style.cursor = "grab";
+}
+
+function onMouseMove(event) {
+    if (!config.graphEnabled || drawPathBusy) return;
+
+    if (isDragging) {
+        lastHighlighted = null;
+        
+        const dx = event.clientX - dragStartX;
+        const dy = event.clientY - dragStartY;
+
+        if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+            hasMoved = true;
+        }
+
+        if (hasMoved) {
+            camera.offsetX = cameraStartX + dx;
+            camera.offsetY = cameraStartY + dy;
+
+            drawFullGraph(data[config.dataMode], false);
+        }
+    }
+
+    updateCursor(event);
+}
+
+function onMouseUp(event) {
+    if (!config.graphEnabled || drawPathBusy) return;
+
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    if (!hasMoved) handleGraphClick(event);
+
+    hasMoved = false;
+    updateCursor(event);
+}
+
+let lastHighlighted = null;
+function handleGraphClick(event) {
+    if (!config.graphEnabled || drawPathBusy) return;
+
+    const dataLocal = data[config.dataMode];
+
+    const closestNode = getClosestNodeToMouse(dataLocal, event);
+
+    if (closestNode == null || dataLocal[closestNode] == null) return true;
+
+    if (lastHighlighted == closestNode) {
+        lastHighlighted = null;
+        drawFullGraph(dataLocal, false);
+        return false;
+    }
+
+    lastHighlighted = closestNode;
+
+    highlistNodeFirstDegree(dataLocal, closestNode);
+}
+
+function updateCursor(event) {
+    if (!config.graphEnabled || drawPathBusy) {
+        canvas.style.cursor = "default";
+        return;
+    }
+
+    if (isDragging && hasMoved) {
+        canvas.style.cursor = "grabbing";
+        return;
+    }
+
+    if (isDragging && !hasMoved) {
+        canvas.style.cursor = "grab";
+        return;
+    }
+
+    const node = getClosestNodeToMouse(data[config.dataMode], event);
+    canvas.style.cursor = node ? "pointer" : "grab";
 }
 
 export function handleAlgoChange(graphAlgo) {
@@ -31,6 +178,15 @@ export function drawFullGraph(data, redoVertexPositions = false) {
     
     resizeCanvas();
     clearCanvas();
+    
+    ctx.setTransform(
+        camera.scale,
+        0,
+        0,
+        camera.scale,
+        camera.offsetX,
+        camera.offsetY
+    );
 
     const X_LOWER = VERTEX_RADIUS;
     const X_UPPER = ctx.canvas.width - VERTEX_RADIUS;
@@ -104,15 +260,24 @@ export function drawFullGraph(data, redoVertexPositions = false) {
     drawEdges(data, data);
 
     // Draw nodes
-    drawNodes(data);
+    drawNodes(data, false);
 }
 
 export function highlistNodeFirstDegree(data, k) {
     if (k == null || data[k] == null) return;
     
     clearCanvas();
+
+    ctx.setTransform(
+        camera.scale,
+        0,
+        0,
+        camera.scale,
+        camera.offsetX,
+        camera.offsetY
+    );
     
-    drawEdges(data, { k: data[k] });
+    drawEdges(data, { [k]: data[k] });
 
     const nodesToDraw = { k: data[k] };
     for (const c of Object.keys(data[k].connections)) {
@@ -164,7 +329,7 @@ function drawNodes(drawData, emphasizeFirst = false) {
     }
 }
 
-let drawPathBusy = false;
+export let drawPathBusy = false;
 export function drawPath(data, vertices, animateDelay = 0, onComplete = () => {}) {
     // if (drawPositions.length == 0) return;
     if (drawPathBusy) return;
@@ -183,6 +348,20 @@ export function drawPath(data, vertices, animateDelay = 0, onComplete = () => {}
     }
 
     drawPathBusy = true;
+
+    clearCanvas();
+
+    ctx.setTransform(
+        camera.scale,
+        0,
+        0,
+        camera.scale,
+        camera.offsetX,
+        camera.offsetY
+    );
+
+    drawEdges(data, data);
+    drawNodes(data, false);
 
     function drawEdge(idx) {
         const prevPrev = idx >= 2 ? data[vertices[idx - 2]].pos : null;
@@ -204,8 +383,11 @@ export function drawPath(data, vertices, animateDelay = 0, onComplete = () => {}
         ctx.stroke();
 
         if (animateDelay > 0) {
+            const screenX = curr.pos.x * camera.scale + camera.offsetX;
+            const screenY = (curr.pos.y - VERTEX_RADIUS) * camera.scale + camera.offsetY;
+            updateTooltipPos(screenX, screenY, true, true);
+
             updateTooltipText(data[vertices[idx]].label || toTitleCase(vertices[idx]));
-            updateTooltipPos(curr.pos.x, curr.pos.y - VERTEX_RADIUS, true, true);
             updateTooltipBorderColor(curr.colorH);
         }
 
@@ -287,7 +469,9 @@ export function getClosestNodeToMouse(data, event) {
     for (const k of Object.keys(data)) {
         const v = data[k];
 
-        if (Math.abs(v.pos.x - event.clientX) <= VERTEX_RADIUS && Math.abs(v.pos.y - event.clientY) <= VERTEX_RADIUS) {
+        const world = screenToWorld(event.clientX - rect.x, event.clientY - rect.y);
+
+        if (Math.abs(v.pos.x - world.x) <= VERTEX_RADIUS && Math.abs(v.pos.y - world.y) <= VERTEX_RADIUS) {
             found = k;
             break;
         }

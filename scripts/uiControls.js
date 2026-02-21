@@ -1,5 +1,5 @@
 import { data, hamPaths } from "./data.js";
-import { drawFullGraph, drawPath, clearCanvas, connectTwoNodes, handleAlgoChange, getClosestNodeToMouse, highlistNodeFirstDegree } from "./canvas.js";
+import { drawFullGraph, drawPath, clearCanvas, connectTwoNodes, handleAlgoChange, getClosestNodeToMouse, resetZoom, zoomAt, canvas, drawPathBusy } from "./canvas.js";
 import { clamp, toTitleCase } from "./util.js";
 
 export const DATA_MODES = Object.freeze({
@@ -28,6 +28,10 @@ export const config = {
 const IdataMode = document.querySelector("#dataMode");
 const IgraphAlgo = document.querySelector("#graphAlgo");
 const IdrawGraph = document.querySelector("#drawGraph");
+
+const IresetGraphZoom = document.querySelector("#graphZoomReset");
+const IzoomGraphIn = document.querySelector("#graphZoomIn");
+const IzoomGraphOut = document.querySelector("#graphZoomOut");
 
 const IconnectFrom = document.querySelector("#connectFrom");
 const IconnectTo = document.querySelector("#connectTo");
@@ -75,6 +79,27 @@ export function attachUIEventListeners() {
         IdrawGraph.innerText = "Redraw";
         drawFullGraph(data[config.dataMode], true);
         updateConnectDropdowns(data[config.dataMode]);
+    });
+
+    IresetGraphZoom.addEventListener("click", () => {
+        if (!config.graphEnabled) return;
+
+        resetZoom();
+        drawFullGraph(data[config.dataMode], false);
+    });
+
+    IzoomGraphIn.addEventListener("click", () => {
+        if (!config.graphEnabled) return;
+        
+        zoomAt(canvas.width / 2, canvas.height / 2, 1.2)
+        drawFullGraph(data[config.dataMode], false);
+    });
+
+    IzoomGraphOut.addEventListener("click", () => {
+        if (!config.graphEnabled) return;
+        
+        zoomAt(canvas.width / 2, canvas.height / 2, 1 / 1.2);
+        drawFullGraph(data[config.dataMode], false);
     });
 
     IconnectNodes.addEventListener("click", () => {
@@ -185,21 +210,22 @@ export function handleMouseMove(data, event) {
     updateTooltipPos(event.clientX + 7, event.clientY + 5);
 }
 
-let lastHighlighted = null;
-export function handleMouseClick(data, event) {
-    const closestNode = getClosestNodeToMouse(data, event);
+export function handleScrollWheel(data, event) {
+    event.preventDefault();
 
-    if (closestNode == null || data[closestNode] == null) return true;
+    if (!config.graphEnabled || drawPathBusy) return;
 
-    if (lastHighlighted == closestNode) {
-        lastHighlighted = null;
-        drawFullGraph(data, false);
-        return false;
-    }
+    const rect = canvas.getBoundingClientRect();
 
-    lastHighlighted = closestNode;
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
-    highlistNodeFirstDegree(data, closestNode);
+    const zoomIntensity = 0.0015;
+    const factor = 1 - event.deltaY * zoomIntensity;
+
+    zoomAt(mouseX, mouseY, factor);
+
+    drawFullGraph(data, false);
 }
 
 function disableAllElems(className) {
@@ -225,11 +251,33 @@ export function updateTooltipText(str) {
 
 export function updateTooltipPos(x, y, centerX = false, lowerY = false) {
     tooltip.style.display = "block";
-    tooltip.style.left = x + "px";
-    tooltip.style.top = y + "px";
+    // tooltip.style.left = "0px";
+    // tooltip.style.top = "0px";
+
+    tooltip.style.transform = "translate(0, 0)";
 
     const rect = tooltip.getBoundingClientRect();
-    if (centerX) tooltip.style.left = (x - (rect.width / 2)) + "px";
-    if (lowerY) tooltip.style.top = (y + rect.height) + "px";
-    if (rect.x + rect.width > window.innerWidth) tooltip.style.left = (x - rect.width) + "px";
+    const SPACING = 8;
+
+    let finalX = x;
+    let finalY;
+
+    // Horizontal centering
+    if (centerX) finalX = x - (rect.width / 2);
+
+    // Clamp horizontal
+    if (finalX + rect.width > window.innerWidth) finalX = window.innerWidth - rect.width - SPACING;
+    if (finalX < SPACING) finalX = SPACING;
+
+    // Vertical placing
+    if (lowerY) finalY = y + SPACING; // small spacing below anchor
+    else finalY = y - rect.height - SPACING; // above anchor
+
+    // Clamp vertical
+    if (finalY + rect.height > window.innerHeight) finalY = window.innerHeight - rect.height - SPACING;
+    if (finalY < SPACING) finalY = SPACING;
+
+    // tooltip.style.left = `${finalX}px`;
+    // tooltip.style.top = `${finalY}px`;
+    tooltip.style.transform = `translate(${finalX}px, ${finalY}px)`;
 }

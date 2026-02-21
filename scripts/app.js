@@ -1,9 +1,10 @@
 import { data } from "./data.js";
 
-import { drawFullGraph, resizeCanvas } from "./canvas.js";
-import { attachUIEventListeners, config, handleMouseClick, handleMouseMove } from "./uiControls.js";
+import { attachCanvasEventListeners, drawFullGraph, resizeCanvas } from "./canvas.js";
+import { attachUIEventListeners, config, handleMouseMove, handleScrollWheel } from "./uiControls.js";
 
 attachUIEventListeners();
+attachCanvasEventListeners();
 
 window.addEventListener("resize", () => {
     resizeCanvas();
@@ -11,4 +12,4 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("mousemove", (e) => handleMouseMove(data[config.dataMode], e));
-document.addEventListener("click", (e) => handleMouseClick(data[config.dataMode], e));
+document.addEventListener("wheel", (e) => handleScrollWheel(data[config.dataMode], e), { passive: false });

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 100 100"
+    width="100"
+    height="100">
+
+    <path fill="white" fill-rule="evenodd" d="M 15 50 L 85 50 L 85 100 L 15 100 Z M 40 65 L 60 65 L 60 100 L 40 100 Z" />
+    <path d="M 0 50 L 50 0 L 100 50 Z" fill="white" />
+    <rect x="70" y="13" width="10" height="20" fill="white" />
+</svg>
