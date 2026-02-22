@@ -1,5 +1,5 @@
 import { data, hamPaths } from "./data.js";
-import { drawFullGraph, drawPath, clearCanvas, connectTwoNodes, handleAlgoChange, getClosestNodeToMouse, resetZoom, zoomAt, canvas, drawPathBusy } from "./canvas.js";
+import { drawFullGraph, drawPath, clearCanvas, connectTwoNodes, handleAlgoChange, getClosestNodeToMouse, resetZoom, zoomAt, canvas, drawPathBusy, handleDataModeChange } from "./canvas.js";
 import { clamp, toTitleCase } from "./util.js";
 
 export const DATA_MODES = Object.freeze({
@@ -32,7 +32,7 @@ export const renderLoop = {
 
     frame(data) {
         if (!this.enabled) return;
-        
+
         this.active = true;
         drawFullGraph(data, false);
         
@@ -79,6 +79,7 @@ updateTextDependencies();
 export function attachUIEventListeners() {
     IdataMode.addEventListener("change", () => {
         config.dataMode = IdataMode.value == "0" ? DATA_MODES.STUDENTS : DATA_MODES.GROUPS;
+        handleDataModeChange();
 
         clearCanvas();
         config.graphEnabled = false;

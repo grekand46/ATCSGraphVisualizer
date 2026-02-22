@@ -44,6 +44,7 @@ export function screenTooSmall() {
 
 export function resizeCanvas() {
     renderLoop.cancel();
+    drawPositions.length = 0;
 
     canvas.width = 0;
     canvas.height = 0;
@@ -178,8 +179,13 @@ function updateCursor(event) {
     canvas.style.cursor = node ? "pointer" : "grab";
 }
 
+export function handleDataModeChange() {
+    drawPositions.length = 0;
+}
+
 export function handleAlgoChange(graphAlgo) {
     VERTEX_RADIUS = graphAlgo;
+    drawPositions.length = 0;
 }
 
 export function drawFullGraph(data, redoVertexPositions = false) {
